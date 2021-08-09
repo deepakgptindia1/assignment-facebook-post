@@ -218,14 +218,23 @@ $button-background:#F0F2F5;
         }
     }
 }
+.disabled{
+   pointer-events: none;
+   background: grey !important;
+}
 
 .post-show{
     margin-top:20px;
     background-color: white;
+    transition:300ms;
     opacity: 0.5;
     border-radius: 5px;
     padding:5px 10px;
     
+}
+
+.opacity{
+    opacity: 1;
 }
 
 .show-header{

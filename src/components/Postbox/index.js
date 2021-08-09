@@ -2,13 +2,16 @@ import React,{useState, useEffect} from 'react'
 import './index.css';
 import axios from 'axios';
 import Post from '../Post';
-function Postbox() {
+import { connect } from 'react-redux';
+import { createPost } from '../../actions';
+function Postbox(props) {
     const [show, setShow]=useState(false);
     const [input, setInput]=useState("Trending");
     const [gifs, setGifs]=useState([]);
     const [loader,setLoader]=useState(false);
     const [choosenGif, setChoosenGif]=useState("");
     const [postText, setPostText]=useState("");
+    const [opacity, setOpacity]=useState(false);
      
     useEffect(()=>{
         const axiosFetch=async ()=>{
@@ -26,7 +29,7 @@ function Postbox() {
         }
         axiosFetch();
         
-        console.log(gifs)
+        // console.log(gifs)
     },[])
 
      useEffect(()=>{
@@ -48,7 +51,7 @@ function Postbox() {
         }
         axiosFetch();
         
-        console.log(gifs)
+        // console.log(gifs)
     },[input])
 
     const list=()=>{
@@ -72,9 +75,35 @@ function Postbox() {
         setShow(!show);
     }
 
-    const onClickPost=()=>{
+    const onClickPost=(e)=>{
+        e.preventDefault();
+        if(postText===""){
+            return;
+        }
+        var today = new Date();
+
+        var dateToday =today.getDate() +'-'+(today.getMonth()+1)+'-'+today.getFullYear();
+        var timeNow = today.getHours()  + ":" +today.getMinutes();
+        props.createPost({
+            name:"Jawakar Durai",
+            date:dateToday,
+            time:timeNow,
+            desc:postText,
+            img:choosenGif
+        })
+
         setPostText("");
         setChoosenGif("");
+        setOpacity(true);
+    }
+
+    const renderedPosts=()=>{
+        console.log(props.posts);
+        return  props.posts.map((post,i)=>{
+            return (
+                <Post opacity={opacity} key={i} name={post.name} date={post.date} time={post.time} desc={post.desc} img={post.img} />
+            )
+        })
     }
 
     return (
@@ -94,14 +123,14 @@ function Postbox() {
             </div>
             <div className="text-area">
                 <img src="https://www.w3schools.com/howto/img_avatar2.png" alt="img"/>
-                <textarea placeholder="Write Something..." value={postText} onChange={(e)=>setPostText(e.target.value)}/>
+                <textarea placeholder="Write Something..." value={postText} onChange={(e)=>setPostText(e.target.value)} onClick={()=>setOpacity(false)}/>
                 < i className="fas fa-laugh-beam"></i>
                 
                 
             </div>  
             <div className="selected-img">
                 {
-                   choosenGif?(<img src={choosenGif} alt="image"/>):null
+                   choosenGif?(<img src={choosenGif} alt="gif"/>):null
                 }
             </div>
             
@@ -152,7 +181,7 @@ function Postbox() {
                             value={input}
                             onChange={(e)=>setInput(e.target.value)}
                         ></input>
-                        {   console.log(loader),
+                        {   
                             loader?(<i class="fas fa-spinner"><h4>Loading</h4></i>):null
                         }
                         {list()}
@@ -168,15 +197,20 @@ function Postbox() {
             </div>
             <div className="post-footer">
                 <button> <i className="fas fa-lock"></i> Only me <i className="fas fa-sort-down"/></button>
-                <button onClick={onClickPost}> Post </button>
+                <button className={`${postText===""?`disabled`:``}`} onClick={(e)=>onClickPost(e)}> Post </button>
             </div>
         </div>
-        
-        <Post name={"Deepak Gupta"} date={"6th August"} time={"22:30"} desc={"What we think, we become. – Buddha"} img={"https://coolthemestores.com/wp-content/uploads/2021/04/nature-chrome-featured.jpg"} />
+        {
+           renderedPosts()
+        }
+        {/* <Post name={"Deepak Gupta"} date={"6th August"} time={"22:30"} desc={"What we think, we become. – Buddha"} img={"https://coolthemestores.com/wp-content/uploads/2021/04/nature-chrome-featured.jpg"} /> */}
         </div>
 
         
     )
 }
+const mapStateToProps=(state)=>{
+    return { posts:state.posts }
+}
 
-export default Postbox;
+export default connect(mapStateToProps,{createPost})(Postbox);
